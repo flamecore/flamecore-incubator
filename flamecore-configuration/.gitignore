@@ -1,0 +1,7 @@
+/.idea/
+/nbproject/
+/vendor/
+/composer.lock
+/data/*
+studio.json
+config.toml

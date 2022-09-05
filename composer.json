@@ -1,0 +1,30 @@
+{
+    "name": "flamecore/incubator",
+    "type": "library",
+    "description": "Incubator for libraries and components under development",
+    "keywords": ["flamecore", "incubator", "common", "components", "libraries"],
+    "homepage": "https://flamecore.org",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Christian Neff",
+            "email": "christian.neff@gmail.com",
+            "homepage": "https://secondtruth.de",
+            "role": "Developer"
+        }
+    ],
+    "support": {
+        "issues": "https://github.com/flamecore/flamecore-incubator/issues",
+        "wiki": "https://github.com/flamecore/flamecore-incubator/wiki"
+    },
+    "require": {
+        "wikimedia/composer-merge-plugin": "^2.0"
+    },
+    "extra": {
+        "merge-plugin": {
+            "require": [
+                "*/composer.json"
+            ]
+        }
+    }
+}

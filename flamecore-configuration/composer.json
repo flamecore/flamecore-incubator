@@ -1,0 +1,36 @@
+{
+    "name": "flamecore/configuration",
+    "type": "library",
+    "description": "Retrieve, write and validate configuration values",
+    "keywords": ["flamecore", "configuration"],
+    "homepage": "https://www.flamecore.org",
+    "license": "MIT",
+    "support": {
+        "issues": "https://github.com/flamecore/flamecore-configuration/issues",
+        "wiki": "https://github.com/flamecore/flamecore-configuration/wiki"
+    },
+    "authors": [
+        {
+            "name": "Christian Neff",
+            "email": "christian.neff@gmail.com",
+            "homepage": "http://www.secondtruth.de",
+            "role": "Developer"
+        }
+    ],
+    "require": {
+        "php": ">=8.0",
+        "ext-json": "*",
+        "flamecore/common": "dev-main",
+        "symfony/options-resolver": "^5.1"
+    },
+    "require-dev": {
+        "franzl/studio": "dev-master",
+        "phpstan/phpstan": "^0.12.38",
+        "symplify/easy-coding-standard": "^10.2"
+    },
+    "autoload": {
+        "psr-4": {
+            "FlameCore\\Configuration\\": "src/"
+        }
+    }
+}

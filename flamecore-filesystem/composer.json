@@ -1,0 +1,48 @@
+{
+    "name": "flamecore/filesystem",
+    "type": "library",
+    "description": "Utilities for paths and the filesystem",
+    "keywords": ["flamecore", "filesystem", "path"],
+    "homepage": "https://www.flamecore.org",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Christian Neff",
+            "email": "christian.neff@gmail.com",
+            "homepage": "https://www.secondtruth.de",
+            "role": "Developer"
+        }
+    ],
+    "support": {
+        "issues": "https://github.com/flamecore/flamecore-filesystem/issues",
+        "wiki": "https://github.com/flamecore/flamecore-filesystem/wiki"
+    },
+    "require": {
+        "php" : ">=8.0",
+        "ext-ctype": "*",
+        "flamecore/common": "dev-main"
+    },
+    "require-dev": {
+        "franzl/studio": "dev-master",
+        "phpunit/phpunit" : "^9.0",
+        "symplify/easy-coding-standard": "^10.2"
+    },
+    "autoload": {
+        "psr-4": {
+            "FlameCore\\Filesystem\\": "src"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "FlameCore\\Filesystem\\Tests\\": "tests"
+        }
+    },
+    "scripts": {
+        "test": "phpunit",
+        "check-style": "ecs check",
+        "fix-style": "ecs check --fix"
+    },
+    "config": {
+        "sort-packages": true
+    }
+}
