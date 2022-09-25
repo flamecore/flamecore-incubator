@@ -1,0 +1,36 @@
+{
+    "name": "flamecore/networking",
+    "description": "A complete networking library",
+    "keywords": ["flamecore", "networking", "network", "ip"],
+    "homepage": "https://www.flamecore.org",
+    "license": "MIT",
+    "support": {
+        "issues": "https://github.com/flamecore/flamecore-networking/issues",
+        "wiki": "https://github.com/flamecore/flamecore-networking/wiki"
+    },
+    "authors": [
+        {
+            "name": "Christian Neff",
+            "email": "christian.neff@gmail.com",
+            "homepage": "http://www.secondtruth.de",
+            "role": "Developer"
+        }
+    ],
+    "require": {
+        "php": ">=8.1",
+        "flamecore/common": "dev-main",
+        "ext-intl": "*"
+    },
+    "require-dev": {
+        "phpunit/phpunit" : "^9.0",
+        "symplify/easy-coding-standard": "^10.2",
+        "franzl/studio": "dev-master",
+        "phpstan/phpstan": "^0.12.38"
+    },
+    "minimum-stability": "dev",
+    "autoload": {
+        "psr-4": {
+            "FlameCore\\Networking\\": "src/"
+        }
+    }
+}
