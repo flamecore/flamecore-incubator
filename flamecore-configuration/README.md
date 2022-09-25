@@ -30,8 +30,11 @@ To install the library, run the following command and you will get the latest ve
 If you discover any security related issues, please email security@flamecore.org instead of using the issue tracker.
 
 
-## Credits
+## Author, Credits and License
 
-- [Nette Framework team and contributors](https://nette.org)
-- [Christian Neff](https://www.secondtruth.de)
-- [All Contributors](https://github.com/flamecore/flamecore-configuration/graphs/contributors)
+This project was created by the [FlameCore Team](https://flamecore.org) and is licensed under the [MIT License](LICENSE.md).
+
+Project maintained by:
+- [Christian Neff](https://www.secondtruth.de) ([@secondtruth](https://github.com/secondtruth))
+
+Many thanks to [all other Contributors](https://github.com/flamecore/flamecore-configuration/graphs/contributors)!
