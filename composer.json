@@ -26,5 +26,11 @@
                 "*/composer.json"
             ]
         }
+    },
+    "config": {
+        "allow-plugins": {
+            "wikimedia/composer-merge-plugin": true,
+            "franzl/studio": true
+        }
     }
 }
