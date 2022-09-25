@@ -18,18 +18,18 @@
         "wiki": "https://github.com/flamecore/flamecore-incubator/wiki"
     },
     "require": {
-        "wikimedia/composer-merge-plugin": "^2.0"
+        "php": ">=8.1"
     },
-    "extra": {
-        "merge-plugin": {
-            "require": [
-                "*/composer.json"
-            ]
+    "autoload": {
+        "psr-4": {
+            "FlameCore\\Configuration\\": "flamecore-configuration/src",
+            "FlameCore\\Database\\": "flamecore-database/src",
+            "FlameCore\\Filesystem\\": "flamecore-filesystem/src",
+            "FlameCore\\Networking\\": "flamecore-networking/src"
         }
     },
     "config": {
         "allow-plugins": {
-            "wikimedia/composer-merge-plugin": true,
             "franzl/studio": true
         }
     }
