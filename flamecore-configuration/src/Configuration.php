@@ -13,6 +13,7 @@ declare(strict_types=1);
 namespace FlameCore\Configuration;
 
 use FlameCore\Common\Arrays;
+use FlameCore\Common\Arrays\ArrayEntry;
 use FlameCore\Configuration\Resolver\ConfigResolverInterface;
 
 /**
@@ -53,14 +54,7 @@ class Configuration implements ConfigurationInterface
      */
     public function has(string $path): bool
     {
-        try {
-            $path = explode('.', $path);
-            Arrays::get($this->values, $path);
-
-            return true;
-        } catch (NotFoundException $e) {
-            return false;
-        }
+        return ArrayEntry::fromPath($this->values, $path)->exists();
     }
 
     /**
@@ -68,20 +62,23 @@ class Configuration implements ConfigurationInterface
      */
     public function get(string $path, bool $raw = false)
     {
-        $path = explode('.', $path);
-        $value = Arrays::get($this->values, $path);
+        $entry = ArrayEntry::fromPath($this->values, $path);
 
-        return !$raw ? $this->value($value) : $value;
+        if (!$entry->exists()) {
+            throw new NotFoundException(sprintf('The configuration path "%s" does not exist.', $path));
+        }
+
+        return !$raw ? $this->value($entry->get()) : $entry->get();
     }
 
     /**
      * {@inheritdoc}
      */
-    public function getOr(string $path, $default, bool $raw = false)
+    public function getOr(string $path, mixed $default, bool $raw = false)
     {
         try {
             return $this->get($path, $raw);
-        } catch (NotFoundException $e) {
+        } catch (NotFoundException) {
             return !$raw ? $this->value($default) : $default;
         }
     }
@@ -102,8 +99,7 @@ class Configuration implements ConfigurationInterface
      */
     public function set(string $path, $value): void
     {
-        $path = explode('.', $path);
-        Arrays::set($this->values, $path, $value);
+        ArrayEntry::fromPath($this->values, $path)->set($value);
     }
 
     /**
@@ -123,8 +119,7 @@ class Configuration implements ConfigurationInterface
      */
     public function remove(string $path): void
     {
-        $path = explode('.', $path);
-        Arrays::remove($this->values, $path);
+        ArrayEntry::fromPath($this->values, $path)->remove();
     }
 
     /**
