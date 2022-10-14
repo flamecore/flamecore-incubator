@@ -1,7 +1,7 @@
 {
     "name": "flamecore/networking",
     "description": "A complete networking library",
-    "keywords": ["flamecore", "networking", "network", "ip"],
+    "keywords": ["flamecore", "networking", "network", "ip", "dns", "domains"],
     "homepage": "https://www.flamecore.org",
     "license": "MIT",
     "support": {
@@ -18,14 +18,14 @@
     ],
     "require": {
         "php": ">=8.1",
-        "flamecore/common": "dev-main",
-        "ext-intl": "*"
+        "ext-intl": "*",
+        "flamecore/common": "dev-main"
     },
     "require-dev": {
-        "phpunit/phpunit" : "^9.0",
+        "phpunit/phpunit" : "^9.5",
+        "phpstan/phpstan": "^1.8",
         "symplify/easy-coding-standard": "^10.2",
-        "franzl/studio": "dev-master",
-        "phpstan/phpstan": "^0.12.38"
+        "rector/rector": "^0.14"
     },
     "minimum-stability": "dev",
     "autoload": {

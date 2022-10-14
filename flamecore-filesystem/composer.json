@@ -23,8 +23,7 @@
         "flamecore/common": "dev-main"
     },
     "require-dev": {
-        "franzl/studio": "dev-master",
-        "phpunit/phpunit" : "^9.0",
+        "phpunit/phpunit" : "^9.5",
         "symplify/easy-coding-standard": "^10.2"
     },
     "autoload": {
