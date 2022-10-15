@@ -1,6 +1,6 @@
 <?php
 /*
- * FlameCore Filesystem
+ * FlameCore Filesystem Component
  * Copyright (C) 2022 FlameCore Team
  *
  * Permission to use, copy, modify, and/or distribute this software for
@@ -388,7 +388,7 @@ class FilesystemTest extends FilesystemTestCase
 
         // create symlink to nonexistent dir
         rmdir($basePath . 'dir');
-        $this->assertFalse('\\' === \DIRECTORY_SEPARATOR ? @readlink($basePath . 'dir-link') : is_dir($basePath . 'dir-link'));
+        $this->assertDirectoryDoesNotExist($basePath . 'dir-link');
 
         Filesystem::remove($basePath);
 

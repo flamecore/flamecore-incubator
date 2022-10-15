@@ -1,6 +1,6 @@
 <?php
 /*
- * FlameCore Filesystem
+ * FlameCore Filesystem Component
  * Copyright (C) 2022 FlameCore Team
  *
  * Permission to use, copy, modify, and/or distribute this software for
@@ -21,7 +21,6 @@ declare(strict_types=1);
 
 namespace FlameCore\Filesystem\Tests;
 
-use FlameCore\Common\Strings;
 use PHPUnit\Framework\TestCase;
 use FlameCore\Filesystem\Filesystem;
 
@@ -67,7 +66,7 @@ class FilesystemTestCase extends TestCase
             if (@symlink($originDir, $targetDir) !== true) {
                 $report = error_get_last();
                 if (\is_array($report)
-                    && (Strings::contains($report['message'], 'error code(1314)') || Strings::contains($report['message'], 'Permission denied'))) {
+                    && (str_contains($report['message'], 'error code(1314)') || str_contains($report['message'], 'Permission denied'))) {
                     self::$symlinkOnWindows = false;
                 }
             } else {

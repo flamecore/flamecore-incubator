@@ -1,6 +1,6 @@
 <?php
 /*
- * FlameCore Filesystem
+ * FlameCore Filesystem Component
  * Copyright (C) 2022 FlameCore Team
  *
  * Permission to use, copy, modify, and/or distribute this software for
@@ -12,7 +12,6 @@ declare(strict_types=1);
 
 namespace FlameCore\Filesystem\Tests;
 
-use FlameCore\Filesystem\Exception\InvalidArgumentException;
 use FlameCore\Filesystem\Paths;
 use PHPUnit\Framework\TestCase;
 
@@ -62,47 +61,27 @@ class PathsTest extends TestCase
      *
      * @param mixed $expected
      * @param mixed $param
+     * @param mixed $useBackslashes
      */
-    public function testNormalize($expected, $param)
+    public function testNormalize($expected, $param, $useBackslashes = false)
     {
-        $this->assertSame($expected, Paths::normalize($param));
+        $this->assertEquals($expected, Paths::normalize($param, $useBackslashes));
     }
 
     public function provideDataForNormalize()
     {
-        $sep = DIRECTORY_SEPARATOR;
-
         return [
             ['', ''],
-            [$sep, '\\'],
-            [$sep, '/'],
+            ['/', '\\'],
+            ['/', '/'],
             ['file', 'file'],
-            ["file{$sep}", 'file/'],
-            ["d:{$sep}file", 'd:/file'],
-            ["d:{$sep}file", 'd:\file'],
-            ["{$sep}file", '/file'],
-            ['', '.'],
-            [$sep, '\\.'],
-            [$sep, '/.'],
-            [$sep, '.\\'],
-            [$sep, './'],
-            [$sep, '/file/..'],
-            [$sep, '/file/../'],
-            ['', 'file/..'],
-            [$sep, 'file/../'],
-            ["{$sep}..", '/file/../..'],
-            ["{$sep}..{$sep}", '/file/../../'],
-            ['..', 'file/../..'],
-            ["..{$sep}", 'file/../../'],
-            ["{$sep}..{$sep}bar", '/file/../../bar'],
-            ["..{$sep}bar", 'file/../../bar'],
-            ["{$sep}..{$sep}bar", '/file/./.././.././bar'],
-            ["..{$sep}bar", 'file/../../bar/.'],
-            ["{$sep}..{$sep}bar{$sep}", '/file/./.././.././bar/'],
-            ["..{$sep}bar{$sep}", 'file/../../bar/./'],
-            [$sep, '//'],
-            ["{$sep}foo{$sep}", '//foo//'],
-            ["{$sep}", '//foo//..//'],
+            ['file/', 'file/'],
+            ['d:/file', 'd:/file'],
+            ['d:/file', 'd:\file'],
+            ['/file', '/file'],
+            ['/', '//'],
+            ['/foo/', '//foo//'],
+            ['\\', '/', true]
         ];
     }
 
@@ -129,85 +108,5 @@ class PathsTest extends TestCase
             ["{$sep}a{$sep}b{$sep}", ['/a/', '/b/']],
             ["{$sep}", ['/a/', '/../']],
         ];
-    }
-
-    /**
-     * @dataProvider provideDataForMakeRelative
-     *
-     * @param mixed $endPath
-     * @param mixed $startPath
-     * @param mixed $expectedPath
-     */
-    public function testMakeRelative($endPath, $startPath, $expectedPath)
-    {
-        $path = Paths::makeRelative($endPath, $startPath);
-
-        $this->assertEquals($expectedPath, $path);
-    }
-
-    public function provideDataForMakeRelative()
-    {
-        $paths = [
-            ['/var/lib/symfony/src/Symfony/', '/var/lib/symfony/src/Symfony/Component', '../'],
-            ['/var/lib/symfony/src/Symfony/', '/var/lib/symfony/src/Symfony/Component/', '../'],
-            ['/var/lib/symfony/src/Symfony', '/var/lib/symfony/src/Symfony/Component', '../'],
-            ['/var/lib/symfony/src/Symfony', '/var/lib/symfony/src/Symfony/Component/', '../'],
-            ['/usr/lib/symfony/', '/var/lib/symfony/src/Symfony/Component', '../../../../../../usr/lib/symfony/'],
-            ['/var/lib/symfony/src/Symfony/', '/var/lib/symfony/', 'src/Symfony/'],
-            ['/aa/bb', '/aa/bb', './'],
-            ['/aa/bb', '/aa/bb/', './'],
-            ['/aa/bb/', '/aa/bb', './'],
-            ['/aa/bb/', '/aa/bb/', './'],
-            ['/aa/bb/cc', '/aa/bb/cc/dd', '../'],
-            ['/aa/bb/cc', '/aa/bb/cc/dd/', '../'],
-            ['/aa/bb/cc/', '/aa/bb/cc/dd', '../'],
-            ['/aa/bb/cc/', '/aa/bb/cc/dd/', '../'],
-            ['/aa/bb/cc', '/aa', 'bb/cc/'],
-            ['/aa/bb/cc', '/aa/', 'bb/cc/'],
-            ['/aa/bb/cc/', '/aa', 'bb/cc/'],
-            ['/aa/bb/cc/', '/aa/', 'bb/cc/'],
-            ['/a/aab/bb', '/a/aa', '../aab/bb/'],
-            ['/a/aab/bb', '/a/aa/', '../aab/bb/'],
-            ['/a/aab/bb/', '/a/aa', '../aab/bb/'],
-            ['/a/aab/bb/', '/a/aa/', '../aab/bb/'],
-            ['/a/aab/bb/', '/', 'a/aab/bb/'],
-            ['/a/aab/bb/', '/b/aab', '../../a/aab/bb/'],
-            ['/aab/bb', '/aa', '../aab/bb/'],
-            ['/aab', '/aa', '../aab/'],
-            ['/aa/bb/cc', '/aa/dd/..', 'bb/cc/'],
-            ['/aa/../bb/cc', '/aa/dd/..', '../bb/cc/'],
-            ['/aa/bb/../../cc', '/aa/../dd/..', 'cc/'],
-            ['/../aa/bb/cc', '/aa/dd/..', 'bb/cc/'],
-            ['/../../aa/../bb/cc', '/aa/dd/..', '../bb/cc/'],
-            ['C:/aa/bb/cc', 'C:/aa/dd/..', 'bb/cc/'],
-            ['C:/aa/bb/cc', 'c:/aa/dd/..', 'bb/cc/'],
-            ['c:/aa/../bb/cc', 'c:/aa/dd/..', '../bb/cc/'],
-            ['C:/aa/bb/../../cc', 'C:/aa/../dd/..', 'cc/'],
-            ['C:/../aa/bb/cc', 'C:/aa/dd/..', 'bb/cc/'],
-            ['C:/../../aa/../bb/cc', 'C:/aa/dd/..', '../bb/cc/'],
-            ['D:/', 'C:/aa/../bb/cc', 'D:/'],
-            ['D:/aa/bb', 'C:/aa', 'D:/aa/bb/'],
-            ['D:/../../aa/../bb/cc', 'C:/aa/dd/..', 'D:/bb/cc/'],
-        ];
-
-        if ('\\' === \DIRECTORY_SEPARATOR) {
-            $paths[] = ['c:\var\lib/symfony/src/Symfony/', 'c:/var/lib/symfony/', 'src/Symfony/'];
-        }
-
-        return $paths;
-    }
-
-    public function testMakeRelativeWithRelativeStartPath()
-    {
-        $this->expectException(InvalidArgumentException::class);
-        $this->expectExceptionMessage('The start path "var/lib/symfony/src/Symfony/Component" is not absolute.');
-        $this->assertSame('../../../', Paths::makeRelative('/var/lib/symfony/', 'var/lib/symfony/src/Symfony/Component'));
-    }
-
-    public function testMakeRelativeWithRelativeEndPath()
-    {
-        $this->expectException(InvalidArgumentException::class);
-        $this->expectExceptionMessage('The end path "var/lib/symfony/" is not absolute.');
-        $this->assertSame('../../../', Paths::makeRelative('var/lib/symfony/', '/var/lib/symfony/src/Symfony/Component'));
     }
 }
