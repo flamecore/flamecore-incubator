@@ -1,6 +1,6 @@
 <?php
 /*
- * FlameCore Filesystem
+ * FlameCore Filesystem Component
  * Copyright (C) 2022 FlameCore Team
  *
  * Permission to use, copy, modify, and/or distribute this software for
@@ -170,10 +170,6 @@ class Filesystem
     {
         $files = array_reverse($files);
         foreach ($files as $file) {
-            if ($file instanceof \SplFileInfo) {
-                $file = $file->getRealPath();
-            }
-
             if (is_link($file)) {
                 // See https://bugs.php.net/52176
                 if (!(self::box('unlink', $file) || '\\' !== \DIRECTORY_SEPARATOR || self::box('rmdir', $file)) && file_exists($file)) {
@@ -186,7 +182,7 @@ class Filesystem
                     if (file_exists($tmpName)) {
                         try {
                             self::doRemove([$tmpName], true);
-                        } catch (IOException $e) {
+                        } catch (IOException) {
                         }
                     }
 
@@ -210,7 +206,7 @@ class Filesystem
 
                     throw new IOException(sprintf('Failed to remove directory "%s": ', $file) . $lastError);
                 }
-            } elseif (!self::box('unlink', $file) && (strpos(self::$lastError, 'Permission denied') !== false || file_exists($file))) {
+            } elseif (!self::box('unlink', $file) && (str_contains(self::$lastError, 'Permission denied') || file_exists($file))) {
                 throw new IOException(sprintf('Failed to remove file "%s": ', $file) . self::$lastError);
             }
         }
@@ -452,14 +448,6 @@ class Filesystem
                 return null;
             }
 
-            if ('\\' === \DIRECTORY_SEPARATOR) {
-                $path = readlink($path);
-            }
-
-            return realpath($path);
-        }
-
-        if ('\\' === \DIRECTORY_SEPARATOR) {
             return realpath($path);
         }
 
@@ -530,11 +518,11 @@ class Filesystem
             $target = $targetDir . substr($file->getPathname(), $originDirLen);
             $filesCreatedWhileMirroring[$target] = true;
 
-            if (!$copyOnWindows && is_link($filePath)) {
+            if (!$copyOnWindows && is_link($file)) {
                 self::symlink($file->getLinkTarget(), $target);
-            } elseif (is_dir($filePath)) {
+            } elseif (is_dir($file)) {
                 self::createDir($target);
-            } elseif (is_file($filePath)) {
+            } elseif (is_file($file)) {
                 self::copy($filePath, $target, $options['override'] ?? false);
             } else {
                 throw new IOException(sprintf('Unable to guess "%s" file type.', $file), 0, null, $file);

@@ -1,6 +1,6 @@
 <?php
 /*
- * FlameCore Filesystem
+ * FlameCore Filesystem Component
  * Copyright (C) 2022 FlameCore Team
  *
  * Permission to use, copy, modify, and/or distribute this software for
@@ -39,12 +39,10 @@ class Paths
      * Furthermore, all "." and ".." segments are removed as far as possible.
      *
      * @param string $path
-     * @param string $separator
-     * @param bool   $useBackslash
      *
      * @return string
      */
-    public static function canonicalize(string $path, bool $useBackslash = false): string
+    public static function canonicalize(string $path): string
     {
         $parts = $path === '' ? [] : preg_split('~[/\\\\]+~', $path);
         $result = [];
@@ -56,8 +54,7 @@ class Paths
             }
         }
 
-        $separator = $useBackslash ? '\\' : '/';
-        return $result === [''] ? $separator : implode($separator, $result);
+        return $result === [''] ? self::SEPARATOR : implode(self::SEPARATOR, $result);
     }
 
     /**
@@ -75,11 +72,7 @@ class Paths
      */
     public static function normalize(string $path, bool $useBackslash = false): string
     {
-        if ($useBackslash) {
-            return str_replace('/', '\\', $path);
-        } else {
-            return str_replace('\\', '/', $path);
-        }
+        return preg_replace('#[/\\\\]+#', $useBackslash ? '\\' : '/', $path);
     }
 
     /**
@@ -99,7 +92,6 @@ class Paths
      * otherwise.
      *
      * The result is a canonical path.
-     *
      *
      * @param string $path
      *
@@ -167,7 +159,6 @@ class Paths
 
     /**
      * Returns the root directory of a path. The result is a canonical path.
-     *
      *
      * @param string $path
      *
@@ -300,8 +291,7 @@ class Paths
      * @param string $basePath an absolute base path
      * @param string $path
      *
-     * @throws InvalidArgumentException if the base path is not absolute or if
-     *                                  the given path is an absolute path with
+     * @throws InvalidArgumentException if the base path is not absolute or if the given path is an absolute path with
      *                                  a different root than the base path
      */
     public static function makeAbsolute(string $path, string $basePath): string
@@ -329,118 +319,6 @@ class Paths
     }
 
     /**
-     * Turns a path into a relative path.
-     *
-     * The relative path is created relative to the given base path:
-     *
-     * ```php
-     * echo Fiename::makeRelative("/flamecore/style.css", "/flamecore/puli");
-     * // => ../style.css
-     * ```
-     *
-     * If a relative path is passed and the base path is absolute, the relative
-     * path is returned unchanged:
-     *
-     * ```php
-     * Fiename::makeRelative("style.css", "/flamecore/puli/css");
-     * // => style.css
-     * ```
-     *
-     * If both paths are relative, the relative path is created with the
-     * assumption that both paths are relative to the same directory:
-     *
-     * ```php
-     * Fiename::makeRelative("style.css", "flamecore/puli/css");
-     * // => ../../../style.css
-     * ```
-     *
-     * If both paths are absolute, their root directory must be the same,
-     * otherwise an exception is thrown:
-     *
-     * ```php
-     * Fiename::makeRelative("C:/flamecore/style.css", "/flamecore/puli");
-     * // InvalidArgumentException
-     * ```
-     *
-     * If the passed path is absolute, but the base path is not, an exception
-     * is thrown as well:
-     *
-     * ```php
-     * Fiename::makeRelative("/flamecore/style.css", "flamecore/puli");
-     * // InvalidArgumentException
-     * ```
-     *
-     * If the base path is not an absolute path, an exception is thrown.
-     *
-     * The result is a canonical path.
-     *
-     *
-     * @param string $path
-     * @param string $basePath
-     *
-     * @throws InvalidArgumentException if the base path is not absolute or if
-     *                                  the given path has a different root
-     *                                  than the base path
-     */
-    public static function makeRelative(string $path, string $basePath): string
-    {
-        $path = self::canonicalize($path);
-        $basePath = self::canonicalize($basePath);
-
-        [$root, $relativePath] = self::split($path);
-        [$baseRoot, $relativeBasePath] = self::split($basePath);
-
-        // If the base path is given as absolute path and the path is already
-        // relative, consider it to be relative to the given absolute path
-        // already
-        if ($root === '' && $baseRoot !== '') {
-            // If base path is already in its root
-            if ($relativeBasePath === '') {
-                $relativePath = ltrim($relativePath, './\\');
-            }
-
-            return $relativePath;
-        }
-
-        // If the passed path is absolute, but the base path is not, we
-        // cannot generate a relative path
-        if ($root !== '' && $baseRoot === '') {
-            throw new InvalidArgumentException(sprintf('The absolute path "%s" cannot be made relative to the relative path "%s". You should provide an absolute base path instead.', $path, $basePath));
-        }
-
-        // Fail if the roots of the two paths are different
-        if ($baseRoot && $root !== $baseRoot) {
-            throw new InvalidArgumentException(sprintf('The path "%s" cannot be made relative to "%s", because they have different roots ("%s" and "%s").', $path, $basePath, $root, $baseRoot));
-        }
-
-        if ($relativeBasePath === '') {
-            return $relativePath;
-        }
-
-        // Build a "../../" prefix with as many "../" parts as necessary
-        $parts = explode('/', $relativePath);
-        $baseParts = explode('/', $relativeBasePath);
-        $dotDotPrefix = '';
-
-        // Once we found a non-matching part in the prefix, we need to add
-        // "../" parts for all remaining parts
-        $match = true;
-
-        foreach ($baseParts as $index => $basePart) {
-            if ($match && isset($parts[$index]) && $basePart === $parts[$index]) {
-                unset($parts[$index]);
-
-                continue;
-            }
-
-            $match = false;
-            $dotDotPrefix .= '../';
-        }
-
-        return rtrim($dotDotPrefix . implode('/', $parts), '/');
-    }
-
-    /**
      * Returns whether the given path is on the local filesystem.
      *
      * @param string $path
@@ -451,84 +329,9 @@ class Paths
     }
 
     /**
-     * Returns the longest common base path in canonical form of a set of paths or
-     * `null` if the paths are on different Windows partitions.
-     *
-     * Dot segments ("." and "..") are removed/collapsed and all slashes turned
-     * into forward slashes.
-     *
-     * ```php
-     * $basePath = Fiename::getLongestCommonBasePath([
-     *     '/flamecore/css/style.css',
-     *     '/flamecore/css/..'
-     * ]);
-     * // => /flamecore
-     * ```
-     *
-     * The root is returned if no common base path can be found:
-     *
-     * ```php
-     * $basePath = Fiename::getLongestCommonBasePath([
-     *     '/flamecore/css/style.css',
-     *     '/puli/css/..'
-     * ]);
-     * // => /
-     * ```
-     *
-     * If the paths are located on different Windows partitions, `null` is
-     * returned.
-     *
-     * ```php
-     * $basePath = Fiename::getLongestCommonBasePath([
-     *     'C:/flamecore/css/style.css',
-     *     'D:/flamecore/css/..'
-     * ]);
-     * // => null
-     * ```
-     *
-     * @param string[] $paths
-     */
-    public static function getLongestCommonBasePath(string ...$paths): ?string
-    {
-        [$bpRoot, $basePath] = self::split(self::canonicalize(reset($paths)));
-
-        for (next($paths); key($paths) !== null && $basePath !== ''; next($paths)) {
-            [$root, $path] = self::split(self::canonicalize(current($paths)));
-
-            // If we deal with different roots (e.g. C:/ vs. D:/), it's time
-            // to quit
-            if ($root !== $bpRoot) {
-                return null;
-            }
-
-            // Make the base path shorter until it fits into path
-            while (true) {
-                if ($basePath === '.') {
-                    // No more base paths
-                    $basePath = '';
-
-                    // next path
-                    continue 2;
-                }
-
-                // Prevent false positives for common prefixes
-                // see isBasePath()
-                if (mb_strpos($path . '/', $basePath . '/') === 0) {
-                    // next path
-                    continue 2;
-                }
-
-                $basePath = \dirname($basePath);
-            }
-        }
-
-        return $bpRoot . $basePath;
-    }
-
-    /**
      * Joins two or more path strings into a canonical path.
      *
-     * @param string[] $paths
+     * @param string $paths
      */
     public static function join(string ...$paths): string
     {
@@ -601,41 +404,6 @@ class Paths
     }
 
     /**
-     * @param string $root
-     * @param string $pathWithoutRoot
-     *
-     * @return non-empty-string[]
-     */
-    private static function findCanonicalParts(string $root, string $pathWithoutRoot): array
-    {
-        $parts = explode('/', $pathWithoutRoot);
-
-        $canonicalParts = [];
-
-        // Collapse "." and "..", if possible
-        foreach ($parts as $part) {
-            if ($part === '.' || $part === '') {
-                continue;
-            }
-
-            // Collapse ".." with the previous part, if one exists
-            // Don't collapse ".." if the previous part is also ".."
-            if ($part === '..' && \count($canonicalParts) > 0 && $canonicalParts[\count($canonicalParts) - 1] !== '..') {
-                array_pop($canonicalParts);
-
-                continue;
-            }
-
-            // Only add ".." prefixes for relative paths
-            if ($part !== '..' || $root === '') {
-                $canonicalParts[] = $part;
-            }
-        }
-
-        return $canonicalParts;
-    }
-
-    /**
      * Splits a canonical path into its root directory and the remainder.
      *
      * If the path has no root directory, an empty root directory will be
@@ -649,7 +417,6 @@ class Paths
      *
      * list ($root, $path) = Fiename::split("C:")
      * // => ["C:/", ""]
-     *
      *
      * @param string $path
      *
@@ -688,14 +455,5 @@ class Paths
         }
 
         return [$root, $path];
-    }
-
-    private static function toLower(string $string): string
-    {
-        if (false !== $encoding = mb_detect_encoding($string)) {
-            return mb_strtolower($string, $encoding);
-        }
-
-        return strtolower($string, $encoding);
     }
 }

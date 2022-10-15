@@ -1,6 +1,6 @@
 <?php
 /*
- * FlameCore Filesystem
+ * FlameCore Filesystem Component
  * Copyright (C) 2022 FlameCore Team
  *
  * Permission to use, copy, modify, and/or distribute this software for
@@ -20,7 +20,7 @@ use FlameCore\Common\StaticClass;
  *
  * @author Symfony team and contributors
  */
-class Filename
+class Filenames
 {
     use StaticClass;
 
