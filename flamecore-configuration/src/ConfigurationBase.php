@@ -10,22 +10,26 @@
 
 namespace FlameCore\Configuration;
 
+use FlameCore\Common\Arrays;
+use FlameCore\Common\Arrays\ArrayEntry;
+use FlameCore\Configuration\Resolver\ConfigResolverInterface;
+
 /**
- * Class ConfigurationImmutable.
+ * The ConfigurationBase class
  *
  * @author Christian Neff <christian.neff@gmail.com>
  */
-class ConfigurationImmutable implements ConfigurationInterface
+class ConfigurationBase implements ConfigurationInterface
 {
     /**
      * @var array
      */
-    private $values;
+    protected $values;
 
     /**
      * @var array
      */
-    private $variables = [];
+    protected $variables = [];
 
     /**
      * Configuration constructor.
@@ -33,10 +37,10 @@ class ConfigurationImmutable implements ConfigurationInterface
      * @param array|\ArrayAccess $values
      * @param array              $variables
      */
-    public function __construct($values, array $variables = [])
+    public function __construct($values = [], array $variables = [])
     {
-        if (!$this->isAccessible($values)) {
-            throw new \InvalidArgumentException('');
+        if (!Arrays::isAccessible($values)) {
+            throw new \InvalidArgumentException('The value of the $values parameter must be either an array or an object implementing ArrayAccess.');
         }
 
         $this->values = $values;
@@ -48,44 +52,31 @@ class ConfigurationImmutable implements ConfigurationInterface
      */
     public function has(string $path): bool
     {
-        try {
-            $this->get($path, true);
-
-            return true;
-        } catch (NotFoundException $e) {
-            return false;
-        }
+        return ArrayEntry::fromPath($this->values, $path)->exists();
     }
 
     /**
      * {@inheritdoc}
-     *
-     * @see https://stackoverflow.com/a/39118759/2039901
      */
     public function get(string $path, bool $raw = false)
     {
-        $values = $this->values;
+        $entry = ArrayEntry::fromPath($this->values, $path);
 
-        $segments = $this->split($path);
-        foreach ($segments as $segment) {
-            if (!$this->isAccessible($values) || !$this->keyExists($values, $segment)) {
-                throw new NotFoundException(sprintf('Entry "%s" is not defined', $path));
-            }
-
-            $values = $values[$segment];
+        if (!$entry->exists()) {
+            throw new NotFoundException(sprintf('The configuration path "%s" does not exist.', $path));
         }
 
-        return !$raw ? $this->value($values) : $values;
+        return !$raw ? $this->value($entry->get()) : $entry->get();
     }
 
     /**
      * {@inheritdoc}
      */
-    public function getOr(string $path, $default, bool $raw = false)
+    public function getOr(string $path, mixed $default, bool $raw = false)
     {
         try {
             return $this->get($path, $raw);
-        } catch (NotFoundException $e) {
+        } catch (NotFoundException) {
             return !$raw ? $this->value($default) : $default;
         }
     }
@@ -116,21 +107,22 @@ class ConfigurationImmutable implements ConfigurationInterface
     }
 
     /**
+     * @param ConfigResolverInterface $resolver
+     * @param array                   $defaults
+     */
+    public function resolve(ConfigResolverInterface $resolver, array $defaults = []): void
+    {
+        $values = array_replace_recursive($defaults, $this->values);
+
+        $this->values = $resolver->resolve($values);
+    }
+
+    /**
      * @return array
      */
     public function getVariables(): array
     {
         return $this->variables;
-    }
-
-    /**
-     * @param string $path
-     *
-     * @return string[]
-     */
-    protected function split(string $path)
-    {
-        return explode('.', $path);
     }
 
     /**
@@ -142,8 +134,8 @@ class ConfigurationImmutable implements ConfigurationInterface
     {
         if (is_object($value)) {
             if ($value instanceof \Closure || method_exists($value, '__invoke')) {
-                return $value($this, $this->variables);
-            } elseif (method_exists($value, '__toString')) {
+                return $value($this->values, $this->variables);
+            } elseif ($value instanceof \Stringable) {
                 return (string) $value;
             } else {
                 return array_map([$this, 'value'], (array) $value);
@@ -166,34 +158,5 @@ class ConfigurationImmutable implements ConfigurationInterface
         }
 
         return $value;
-    }
-
-    /**
-     * Determine whether the given value is array accessible.
-     *
-     * @param mixed $value
-     *
-     * @return bool
-     */
-    protected function isAccessible($value)
-    {
-        return is_array($value) || $value instanceof \ArrayAccess;
-    }
-
-    /**
-     * Determine if the given key exists in the provided array.
-     *
-     * @param array|\ArrayAccess $values
-     * @param string|int         $key
-     *
-     * @return bool
-     */
-    protected function keyExists($values, $key)
-    {
-        if ($values instanceof \ArrayAccess) {
-            return $values->offsetExists($key);
-        }
-
-        return isset($values[$key]);
     }
 }
