@@ -1,6 +1,6 @@
 <?php
 /*
- * FlameCore Networking Component
+ * FlameCore DNS Component
  * Copyright (C) 2022 FlameCore Team
  *
  * Permission to use, copy, modify, and/or distribute this software for
@@ -27,6 +27,7 @@ use PhpCsFixer\Fixer\ControlStructure\SwitchCaseSemicolonToColonFixer;
 use PhpCsFixer\Fixer\ControlStructure\YodaStyleFixer;
 use PhpCsFixer\Fixer\FunctionNotation\CombineNestedDirnameFixer;
 use PhpCsFixer\Fixer\FunctionNotation\NullableTypeDeclarationForDefaultNullValueFixer;
+use PhpCsFixer\Fixer\Import\FullyQualifiedStrictTypesFixer;
 use PhpCsFixer\Fixer\Import\NoLeadingImportSlashFixer;
 use PhpCsFixer\Fixer\Import\NoUnusedImportsFixer;
 use PhpCsFixer\Fixer\Import\OrderedImportsFixer;
@@ -45,12 +46,15 @@ use PhpCsFixer\Fixer\Phpdoc\PhpdocLineSpanFixer;
 use PhpCsFixer\Fixer\Phpdoc\PhpdocNoAliasTagFixer;
 use PhpCsFixer\Fixer\Phpdoc\PhpdocNoEmptyReturnFixer;
 use PhpCsFixer\Fixer\Phpdoc\PhpdocNoUselessInheritdocFixer;
+use PhpCsFixer\Fixer\Phpdoc\PhpdocOrderFixer;
 use PhpCsFixer\Fixer\Phpdoc\PhpdocReturnSelfReferenceFixer;
 use PhpCsFixer\Fixer\Phpdoc\PhpdocScalarFixer;
 use PhpCsFixer\Fixer\Phpdoc\PhpdocSeparationFixer;
 use PhpCsFixer\Fixer\Phpdoc\PhpdocSummaryFixer;
 use PhpCsFixer\Fixer\Phpdoc\PhpdocTagCasingFixer;
 use PhpCsFixer\Fixer\Phpdoc\PhpdocTrimFixer;
+use PhpCsFixer\Fixer\Phpdoc\PhpdocTypesFixer;
+use PhpCsFixer\Fixer\Phpdoc\PhpdocTypesOrderFixer;
 use PhpCsFixer\Fixer\ReturnNotation\NoUselessReturnFixer;
 use PhpCsFixer\Fixer\Semicolon\NoEmptyStatementFixer;
 use PhpCsFixer\Fixer\StringNotation\SingleQuoteFixer;
@@ -83,8 +87,9 @@ return static function (ECSConfig $config): void {
     ]);
     $config->rule(CombineNestedDirnameFixer::class);
     $config->rule(DirConstantFixer::class);
+    $config->rule(FullyQualifiedStrictTypesFixer::class);
     $config->ruleWithConfiguration(GeneralPhpdocAnnotationRemoveFixer::class, [
-        'annotations' => ['uses', 'package', 'subpackage']
+        'annotations' => ['uses', 'package', 'subpackage', 'since']
     ]);
     $config->ruleWithConfiguration(HeaderCommentFixer::class, [
         'header' => $header,
@@ -117,6 +122,9 @@ return static function (ECSConfig $config): void {
     $config->rule(PhpdocNoAliasTagFixer::class);
     $config->rule(PhpdocNoEmptyReturnFixer::class);
     $config->rule(PhpdocNoUselessInheritdocFixer::class);
+    $config->ruleWithConfiguration(PhpdocOrderFixer::class, [
+        'order' => ['param', 'return', 'throws', 'example']
+    ]);
     $config->rule(PhpdocReturnSelfReferenceFixer::class);
     $config->rule(PhpdocScalarFixer::class);
     $config->rule(PhpdocSeparationFixer::class);
@@ -125,6 +133,11 @@ return static function (ECSConfig $config): void {
         'tags' => ['inheritdoc']
     ]);
     $config->rule(PhpdocTrimFixer::class);
+    $config->rule(PhpdocTypesFixer::class);
+    $config->ruleWithConfiguration(PhpdocTypesOrderFixer::class, [
+        'null_adjustment' => 'always_last',
+        'sort_algorithm' => 'none'
+    ]);
     $config->rule(SelfStaticAccessorFixer::class);
     $config->rule(ShortScalarCastFixer::class);
     $config->rule(SingleLineCommentStyleFixer::class);

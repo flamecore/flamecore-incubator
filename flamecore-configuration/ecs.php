@@ -27,6 +27,7 @@ use PhpCsFixer\Fixer\ControlStructure\SwitchCaseSemicolonToColonFixer;
 use PhpCsFixer\Fixer\ControlStructure\YodaStyleFixer;
 use PhpCsFixer\Fixer\FunctionNotation\CombineNestedDirnameFixer;
 use PhpCsFixer\Fixer\FunctionNotation\NullableTypeDeclarationForDefaultNullValueFixer;
+use PhpCsFixer\Fixer\Import\FullyQualifiedStrictTypesFixer;
 use PhpCsFixer\Fixer\Import\NoLeadingImportSlashFixer;
 use PhpCsFixer\Fixer\Import\NoUnusedImportsFixer;
 use PhpCsFixer\Fixer\Import\OrderedImportsFixer;
@@ -64,7 +65,7 @@ return static function (ECSConfig $config): void {
 
     $year = date('Y');
     $header = <<<EOF
-        FlameCore Configuration
+        FlameCore Configuration Component
         Copyright (C) {$year} FlameCore Team
 
         Permission to use, copy, modify, and/or distribute this software for
@@ -83,6 +84,7 @@ return static function (ECSConfig $config): void {
     ]);
     $config->rule(CombineNestedDirnameFixer::class);
     $config->rule(DirConstantFixer::class);
+    $config->rule(FullyQualifiedStrictTypesFixer::class);
     $config->ruleWithConfiguration(GeneralPhpdocAnnotationRemoveFixer::class, [
         'annotations' => ['uses', 'package', 'subpackage']
     ]);
